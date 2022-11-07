@@ -118,8 +118,13 @@ func (s *composeService) logContainers(ctx context.Context, consumer api.LogCons
 	defer r.Close() //nolint:errcheck
 
 	name := getContainerNameWithoutProject(c)
+	OSC := "\u001B]"
+	BEL := "\u0007"
+	SEP := ";"
+	desktopDeepLink := []string{OSC, "8", SEP, SEP, "docker-desktop://dashboard/containers?id=" + c.ID, BEL, name, OSC, "8", SEP, SEP, BEL}
+
 	w := utils.GetWriter(func(line string) {
-		consumer.Log(name, service, line)
+		consumer.Log(strings.Join(desktopDeepLink[:], ""), service, line)
 	})
 	if cnt.Config.Tty {
 		_, err = io.Copy(w, r)
